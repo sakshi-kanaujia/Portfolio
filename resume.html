@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume — Sakshi Kanaujia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --surface2: #f5f0e8;
+    --border: #e8e2d8;
+    --border-dark: #d4c9b5;
+    --accent: #b8922a;
+    --accent-soft: rgba(184,146,42,0.08);
+    --text: #1a1612;
+    --text-muted: #5c5248;
+    --text-dim: #9a8e82;
+    --black: #0f0c08;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 4rem;
+    background: rgba(250,248,244,0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.4rem;
+    color:var(--accent);
+    text-decoration:none;
+    font-weight:600;
+  }
+  .nav-right { display:flex; gap:1.5rem; align-items:center; }
+  .nav-back {
+    font-size:0.82rem;
+    color:var(--text-muted);
+    text-decoration:none;
+    letter-spacing:0.06em;
+    transition:color 0.3s;
+  }
+  .nav-back:hover { color:var(--accent); }
+  .btn-download {
+    padding:0.6rem 1.5rem;
+    background:var(--accent);
+    color:#fff;
+    font-family:'DM Sans',sans-serif;
+    font-size:0.8rem;
+    font-weight:500;
+    text-decoration:none;
+    letter-spacing:0.05em;
+    transition:all 0.3s;
+  }
+  .btn-download:hover { background:var(--black); }
+
+  /* PAGE */
+  .page {
+    max-width:860px;
+    margin:0 auto;
+    padding:7rem 2rem 4rem;
+  }
+
+  /* HEADER */
+  .resume-header {
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:2rem;
+    align-items:start;
+    padding-bottom:2rem;
+    border-bottom:2px solid var(--black);
+    margin-bottom:2rem;
+  }
+  .resume-name {
+    font-family:'Cormorant Garamond',serif;
+    font-size:3.2rem;
+    font-weight:600;
+    color:var(--black);
+    line-height:1;
+    margin-bottom:0.4rem;
+  }
+  .resume-title {
+    font-size:0.95rem;
+    color:var(--accent);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:500;
+  }
+  .resume-contacts {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:0.3rem;
+    font-size:0.82rem;
+    color:var(--text-muted);
+  }
+  .resume-contacts a { color:var(--text-muted); text-decoration:none; }
+  .resume-contacts a:hover { color:var(--accent); }
+
+  /* LAYOUT */
+  .resume-body {
+    display:grid;
+    grid-template-columns:1fr 260px;
+    gap:3rem;
+    align-items:start;
+  }
+
+  /* SECTIONS */
+  .section { margin-bottom:2.5rem; }
+  .section-title {
+    font-size:0.72rem;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:500;
+    padding-bottom:0.5rem;
+    border-bottom:1px solid var(--border-dark);
+    margin-bottom:1.25rem;
+  }
+
+  /* SUMMARY */
+  .summary p {
+    font-size:0.92rem;
+    color:var(--text-muted);
+    line-height:1.75;
+  }
+
+  /* EXPERIENCE */
+  .exp-item { margin-bottom:1.75rem; }
+  .exp-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:0.2rem;
+  }
+  .exp-title {
+    font-size:1rem;
+    font-weight:500;
+    color:var(--black);
+  }
+  .exp-date {
+    font-size:0.78rem;
+    color:var(--text-dim);
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .exp-company {
+    font-size:0.85rem;
+    color:var(--accent);
+    margin-bottom:0.6rem;
+    font-weight:400;
+  }
+  .exp-bullets {
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:0.35rem;
+  }
+  .exp-bullets li {
+    font-size:0.88rem;
+    color:var(--text-muted);
+    padding-left:1.1rem;
+    position:relative;
+    line-height:1.6;
+  }
+  .exp-bullets li::before {
+    content:'–';
+    position:absolute;
+    left:0;
+    color:var(--accent);
+  }
+
+  /* SIDEBAR */
+  .sidebar {}
+
+  /* SKILLS */
+  .skill-bar-row { margin-bottom:1rem; }
+  .skill-bar-top {
+    display:flex;
+    justify-content:space-between;
+    font-size:0.82rem;
+    color:var(--text-muted);
+    margin-bottom:0.35rem;
+  }
+  .skill-pct { font-size:0.75rem; color:var(--text-dim); }
+  .skill-track {
+    height:2px;
+    background:var(--border);
+  }
+  .skill-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--accent), #d4a843);
+  }
+
+  /* TAGS */
+  .tag-list { display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .tag {
+    padding:0.3rem 0.75rem;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    font-size:0.75rem;
+    color:var(--text-muted);
+  }
+
+  /* CERT ITEMS */
+  .cert-item {
+    padding:0.75rem 0;
+    border-bottom:1px solid var(--border);
+  }
+  .cert-item:last-child { border-bottom:none; }
+  .cert-name {
+    font-size:0.85rem;
+    font-weight:500;
+    color:var(--black);
+    margin-bottom:0.15rem;
+  }
+  .cert-body {
+    font-size:0.78rem;
+    color:var(--text-dim);
+  }
+  .cert-year {
+    font-size:0.73rem;
+    color:var(--accent);
+    margin-top:0.1rem;
+  }
+
+  /* EDU ITEMS */
+  .edu-item { margin-bottom:1rem; }
+  .edu-degree {
+    font-size:0.9rem;
+    font-weight:500;
+    color:var(--black);
+  }
+  .edu-school { font-size:0.8rem; color:var(--text-muted); }
+  .edu-year { font-size:0.75rem; color:var(--text-dim); }
+
+  /* OPEN TO */
+  .open-box {
+    padding:1rem;
+    background:var(--accent-soft);
+    border:1px solid var(--border-dark);
+    border-left:2px solid var(--accent);
+    margin-top:0.5rem;
+  }
+  .open-box p {
+    font-size:0.8rem;
+    color:var(--text-muted);
+    line-height:1.6;
+  }
+
+  /* PORTFOLIO LINK */
+  .portfolio-link {
+    display:block;
+    padding:0.75rem 1rem;
+    background:var(--black);
+    color:#fff;
+    text-decoration:none;
+    font-size:0.8rem;
+    text-align:center;
+    letter-spacing:0.06em;
+    margin-top:1.5rem;
+    transition:background 0.3s;
+  }
+  .portfolio-link:hover { background:var(--accent); }
+
+  @media print {
+    nav { display:none; }
+    .page { padding-top:2rem; }
+    body { background:white; }
+  }
+
+  @media(max-width:768px) {
+    nav { padding:1rem 1.5rem; }
+    .page { padding:6rem 1.25rem 3rem; }
+    .resume-header { grid-template-columns:1fr; }
+    .resume-contacts { align-items:flex-start; }
+    .resume-body { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="https://sakshi-kanaujia.github.io/Portfolio" class="nav-logo">SK</a>
+  <div class="nav-right">
+    <a href="https://sakshi-kanaujia.github.io/Portfolio" class="nav-back">← Portfolio</a>
+    <a href="#" class="btn-download" onclick="window.print()">⬇ Download / Print</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="resume-header">
+    <div>
+      <div class="resume-name">Sakshi Kanaujia</div>
+      <div class="resume-title">PMO Analyst · Operations Specialist · LSS Black Belt</div>
+    </div>
+    <div class="resume-contacts">
+      <a href="mailto:sakshikanaujia0231@gmail.com">sakshikanaujia0231@gmail.com</a>
+      <a href="https://www.linkedin.com/in/sakshi-kanaujia-7709861a3" target="_blank">linkedin.com/in/sakshi-kanaujia</a>
+      <a href="https://sakshi-kanaujia.github.io/Portfolio" target="_blank">sakshi-kanaujia.github.io/Portfolio</a>
+      <span>Lucknow, India · Open to Relocate</span>
+    </div>
+  </div>
+
+  <div class="resume-body">
+
+    <!-- MAIN COLUMN -->
+    <div class="main-col">
+
+      <!-- SUMMARY -->
+      <div class="section summary">
+        <div class="section-title">Professional Summary</div>
+        <p>Analytical and detail-oriented operations professional with ~5 years of experience spanning PMO governance, billing operations, MIS reporting, and knowledge documentation. Dual-certified in Lean Six Sigma (Green Belt & Black Belt) and trained in Generative AI & Digital Marketing (MICA, UpGrad). Track record of 100% audit compliance, ~40% improvement in billing dispute resolution, and ~30% reduction in reporting cycle time. Strong cross-functional collaborator with experience aligning Finance, QA, Training, and Partner teams.</p>
+      </div>
+
+      <!-- EXPERIENCE -->
+      <div class="section">
+        <div class="section-title">Professional Experience</div>
+
+        <div class="exp-item">
+          <div class="exp-header">
+            <div class="exp-title">PMO Analyst & Operations Coordinator</div>
+            <div class="exp-date">Apr 2021 – Jun 2025</div>
+          </div>
+          <div class="exp-company">HCLTech · Lucknow, India</div>
+          <ul class="exp-bullets">
+            <li>Developed and maintained SOPs, process workflows, and knowledge documentation across key project portfolios — achieving 100% audit pass rate across 4 consecutive years.</li>
+            <li>Identified root cause patterns in billing disputes and fixed underlying process gaps, reducing dispute resolution time by ~40%.</li>
+            <li>Built reusable Excel MIS dashboards and reporting frameworks adopted organisation-wide, cutting reporting cycle time by ~30%.</li>
+            <li>Distilled complex finance, billing, and compliance requirements into clear, role-specific communications for cross-functional stakeholders.</li>
+            <li>Coordinated with Training, QA, Finance, and Partner Management teams to drive consensus on process changes and present recommendations to senior leadership.</li>
+          </ul>
+        </div>
+
+        <div class="exp-item">
+          <div class="exp-header">
+            <div class="exp-title">Service Desk & RDS Associate</div>
+            <div class="exp-date">Dec 2020 – Mar 2021</div>
+          </div>
+          <div class="exp-company">HCLTech · Lucknow, India</div>
+          <ul class="exp-bullets">
+            <li>Provided first-level technical support and remote desktop assistance, maintaining SLA compliance and handling escalations.</li>
+            <li>Built foundational exposure to ITSM workflows and ticketing operations.</li>
+          </ul>
+        </div>
+
+        <div class="exp-item">
+          <div class="exp-header">
+            <div class="exp-title">Independent MIS & Operations Consultant</div>
+            <div class="exp-date">Jul 2025 – Present</div>
+          </div>
+          <div class="exp-company">Freelance / Fiverr · Remote</div>
+          <ul class="exp-bullets">
+            <li>Designing bespoke Excel MIS dashboards, process trackers, and BI reports for SME clients.</li>
+            <li>Applying AI tools (Claude, Gemini, Copilot) for workflow automation and documentation.</li>
+          </ul>
+        </div>
+
+        <div class="exp-item">
+          <div class="exp-header">
+            <div class="exp-title">Virtual Data Analyst</div>
+            <div class="exp-date">Aug 2020 – Nov 2020</div>
+          </div>
+          <div class="exp-company">ARDEM Data Services Ltd. · Remote</div>
+          <ul class="exp-bullets">
+            <li>Processed and validated large volumes of structured data, maintaining accuracy benchmarks for outsourced operations clients.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- EDUCATION -->
+      <div class="section">
+        <div class="section-title">Education</div>
+        <div class="edu-item">
+          <div class="edu-degree">Master of Commerce (M.Com)</div>
+          <div class="edu-school">Lucknow University</div>
+          <div class="edu-year">2019 – 2021</div>
+        </div>
+        <div class="edu-item">
+          <div class="edu-degree">B.Voc — Banking & Finance</div>
+          <div class="edu-school">Lucknow University</div>
+          <div class="edu-year">2015 – 2018</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- SKILLS -->
+      <div class="section">
+        <div class="section-title">Core Skills</div>
+        <div class="skill-bar-row">
+          <div class="skill-bar-top"><span>Advanced Excel & MIS</span><span class="skill-pct">95%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:95%"></div></div>
+        </div>
+        <div class="skill-bar-row">
+          <div class="skill-bar-top"><span>PMO Governance</span><span class="skill-pct">92%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:92%"></div></div>
+        </div>
+        <div class="skill-bar-row">
+          <div class="skill-bar-top"><span>Process Documentation</span><span class="skill-pct">90%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:90%"></div></div>
+        </div>
+        <div class="skill-bar-row">
+          <div class="skill-bar-top"><span>Billing Operations</span><span class="skill-pct">90%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:90%"></div></div>
+        </div>
+        <div class="skill-bar-row">
+          <div class="skill-bar-top"><span>Power BI</span><span class="skill-pct">70%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+        <div class="skill-bar-row">
+          <div class="skill-bar-top"><span>SQL</span><span class="skill-pct">55%</span></div>
+          <div class="skill-track"><div class="skill-fill" style="width:55%"></div></div>
+        </div>
+      </div>
+
+      <!-- TOOLS -->
+      <div class="section">
+        <div class="section-title">Tools & Platforms</div>
+        <div class="tag-list">
+          <span class="tag">MS Excel (Advanced)</span>
+          <span class="tag">Power BI</span>
+          <span class="tag">SharePoint</span>
+          <span class="tag">SAP</span>
+          <span class="tag">Google Workspace</span>
+          <span class="tag">MS Office Suite</span>
+          <span class="tag">Claude AI</span>
+          <span class="tag">Gemini</span>
+          <span class="tag">MS Copilot</span>
+          <span class="tag">ChatGPT</span>
+        </div>
+      </div>
+
+      <!-- CERTIFICATIONS -->
+      <div class="section">
+        <div class="section-title">Certifications</div>
+        <div class="cert-item">
+          <div class="cert-name">LSS Black Belt (LSSBB)</div>
+          <div class="cert-body">IMC — Indian Management Congress</div>
+          <div class="cert-year">Jan 2026</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">LSS Green Belt (LSSGB)</div>
+          <div class="cert-body">IMC — Indian Management Congress</div>
+          <div class="cert-year">Jan 2026</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Digital Marketing & GenAI</div>
+          <div class="cert-body">MICA India / UpGrad</div>
+          <div class="cert-year">2024</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Claude 101 — AI Fundamentals</div>
+          <div class="cert-body">Anthropic Academy</div>
+          <div class="cert-year">In Progress</div>
+        </div>
+      </div>
+
+      <!-- OPEN TO -->
+      <div class="section">
+        <div class="section-title">Currently Open To</div>
+        <div class="open-box">
+          <p>Senior Analyst · Senior Associate · Business Operations Specialist<br><br>
+          Remote · Delhi NCR · Pune · Bangalore · Mumbai</p>
+        </div>
+      </div>
+
+      <a href="https://sakshi-kanaujia.github.io/Portfolio" class="portfolio-link">
+        🌐 View Full Portfolio
+      </a>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
