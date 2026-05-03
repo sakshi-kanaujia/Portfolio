@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMO & Billing MIS Dashboard — Sakshi Kanaujia</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --panel: #111118;
+  --panel2: #16161f;
+  --border: #1e1e2e;
+  --border-light: #2a2a3e;
+  --gold: #c9a84c;
+  --gold-soft: rgba(201,168,76,0.12);
+  --teal: #4ecdc4;
+  --teal-soft: rgba(78,205,196,0.12);
+  --rose: #ff6b6b;
+  --rose-soft: rgba(255,107,107,0.12);
+  --blue: #74b9ff;
+  --blue-soft: rgba(116,185,255,0.12);
+  --green: #55efc4;
+  --green-soft: rgba(85,239,196,0.12);
+  --text: #e8e6f0;
+  --text-muted: #7a7890;
+  --text-dim: #3a3850;
+  --white: #f0eeff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none; z-index:0;
+}
+.topbar {
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.9rem 2rem;
+  background: rgba(10,10,15,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-left { display:flex; align-items:center; gap:1.5rem; }
+.logo { font-size:0.85rem; font-weight:700; letter-spacing:0.15em; color:var(--gold); text-decoration:none; }
+.breadcrumb { font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-dim); }
+.breadcrumb span { color:var(--text-muted); }
+.topbar-right { display:flex; align-items:center; gap:1.5rem; }
+.live-badge { display:flex; align-items:center; gap:0.4rem; font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--green); }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(85,239,196,0.4);}50%{opacity:0.7;box-shadow:0 0 0 6px rgba(85,239,196,0);} }
+.period-selector { display:flex; gap:0.25rem; }
+.period-btn {
+  padding:0.3rem 0.75rem;
+  font-family:'Syne',sans-serif; font-size:0.72rem; letter-spacing:0.05em;
+  border:1px solid var(--border); background:transparent; color:var(--text-muted);
+  cursor:pointer; transition:all 0.2s;
+}
+.period-btn.active,.period-btn:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-soft); }
+.back-link { font-size:0.75rem; color:var(--text-muted); text-decoration:none; transition:color 0.2s; }
+.back-link:hover { color:var(--gold); }
+.dashboard { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 49px); position:relative; z-index:1; }
+.sidebar { border-right:1px solid var(--border); padding:1.5rem 0; background:var(--panel); position:sticky; top:49px; height:calc(100vh - 49px); overflow-y:auto; }
+.sidebar-label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); padding:0 1.25rem; margin-bottom:0.5rem; }
+.nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1.25rem; font-size:0.82rem; color:var(--text-muted); cursor:pointer; transition:all 0.2s; border-left:2px solid transparent; }
+.nav-item:hover { color:var(--text); background:var(--panel2); }
+.nav-item.active { color:var(--gold); border-left-color:var(--gold); background:var(--gold-soft); }
+.sidebar-divider { height:1px; background:var(--border); margin:1rem 1.25rem; }
+.kpi-mini { padding:1rem 1.25rem; }
+.kpi-mini-label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; letter-spacing:0.1em; color:var(--text-dim); text-transform:uppercase; margin-bottom:0.3rem; }
+.kpi-mini-val { font-size:1.3rem; font-weight:700; color:var(--gold); line-height:1; }
+.kpi-mini-sub { font-size:0.7rem; color:var(--text-muted); margin-top:0.2rem; }
+.content { padding:1.5rem 2rem; overflow-y:auto; }
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.75rem; flex-wrap:wrap; gap:1rem; }
+.page-title { font-size:1.5rem; font-weight:700; color:var(--white); margin-bottom:0.25rem; }
+.page-sub { font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-muted); }
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+.kpi-card { padding:1.25rem; background:var(--panel); border:1px solid var(--border); position:relative; overflow:hidden; transition:all 0.4s; }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.kpi-card.gold::before { background:var(--gold); }
+.kpi-card.teal::before { background:var(--teal); }
+.kpi-card.rose::before { background:var(--rose); }
+.kpi-card.green::before { background:var(--green); }
+.kpi-label { font-family:'JetBrains Mono',monospace; font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.6rem; }
+.kpi-val { font-size:1.9rem; font-weight:700; line-height:1; margin-bottom:0.4rem; transition:all 0.4s; }
+.kpi-card.gold .kpi-val { color:var(--gold); }
+.kpi-card.teal .kpi-val { color:var(--teal); }
+.kpi-card.rose .kpi-val { color:var(--rose); }
+.kpi-card.green .kpi-val { color:var(--green); }
+.kpi-change { font-family:'JetBrains Mono',monospace; font-size:0.7rem; display:flex; align-items:center; gap:0.3rem; transition:all 0.4s; }
+.kpi-change.up { color:var(--green); }
+.kpi-change.down { color:var(--rose); }
+.kpi-change.neutral { color:var(--text-muted); }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+.grid-3 { display:grid; grid-template-columns:2fr 1fr; gap:1rem; margin-bottom:1rem; }
+.grid-full { margin-bottom:1rem; }
+.panel { background:var(--panel); border:1px solid var(--border); padding:1.25rem; }
+.panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+.panel-title { font-size:0.82rem; font-weight:600; color:var(--white); }
+.panel-meta { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--text-dim); }
+.chart-area { position:relative; height:160px; display:flex; align-items:flex-end; gap:6px; padding-top:1rem; }
+.chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:0.4rem; height:100%; justify-content:flex-end; }
+.chart-bar { width:100%; border-radius:2px 2px 0 0; transition:height 0.6s cubic-bezier(.4,0,.2,1); cursor:pointer; }
+.chart-bar:hover { filter:brightness(1.3); }
+.chart-bar.gold-bar { background:linear-gradient(180deg,var(--gold),rgba(201,168,76,0.4)); }
+.chart-bar.teal-bar { background:linear-gradient(180deg,var(--teal),rgba(78,205,196,0.4)); }
+.chart-label { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--text-dim); }
+.chart-legend { display:flex; gap:1.5rem; margin-top:0.75rem; }
+.legend-item { display:flex; align-items:center; gap:0.4rem; font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--text-muted); }
+.legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.donut-wrap { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+.donut-svg { width:120px; height:120px; }
+.donut-item { display:flex; align-items:center; justify-content:space-between; padding:0.35rem 0; border-bottom:1px solid var(--border); font-size:0.78rem; }
+.donut-item:last-child { border-bottom:none; }
+.donut-item-left { display:flex; align-items:center; gap:0.5rem; color:var(--text-muted); }
+.donut-item-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.donut-item-val { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--text); }
+.proj-table { width:100%; border-collapse:collapse; }
+.proj-table th { font-family:'JetBrains Mono',monospace; font-size:0.62rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); text-align:left; padding:0.5rem 0.75rem; border-bottom:1px solid var(--border); }
+.proj-table td { padding:0.75rem; font-size:0.82rem; color:var(--text-muted); border-bottom:1px solid var(--border); vertical-align:middle; transition:background 0.3s; }
+.proj-table tr:last-child td { border-bottom:none; }
+.proj-table tr:hover td { background:var(--panel2); }
+.proj-name { color:var(--text); font-weight:500; }
+.status-badge { display:inline-flex; padding:0.2rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.65rem; border-radius:2px; }
+.status-on { background:var(--green-soft); color:var(--green); }
+.status-at { background:var(--rose-soft); color:var(--rose); }
+.status-hold { background:var(--gold-soft); color:var(--gold); }
+.status-done { background:var(--blue-soft); color:var(--blue); }
+.progress-bar-wrap { display:flex; align-items:center; gap:0.6rem; }
+.progress-track { flex:1; height:3px; background:var(--border); border-radius:2px; }
+.progress-fill { height:100%; border-radius:2px; transition:width 0.6s ease; }
+.progress-fill.gold { background:var(--gold); }
+.progress-fill.teal { background:var(--teal); }
+.progress-fill.rose { background:var(--rose); }
+.progress-fill.blue { background:var(--blue); }
+.progress-fill.green { background:var(--green); }
+.progress-pct { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--text-dim); width:30px; text-align:right; }
+.dispute-list { display:flex; flex-direction:column; gap:0.6rem; }
+.dispute-item { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:1rem; padding:0.75rem; background:var(--panel2); border:1px solid var(--border); font-size:0.8rem; }
+.dispute-type { color:var(--text); font-weight:500; }
+.dispute-count { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--text-muted); }
+.dispute-trend { font-family:'JetBrains Mono',monospace; font-size:0.72rem; }
+.trend-down { color:var(--green); }
+.trend-up { color:var(--rose); }
+.audit-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; }
+.audit-item { padding:1rem; background:var(--panel2); border:1px solid var(--border); text-align:center; }
+.audit-year { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--text-dim); margin-bottom:0.5rem; }
+.audit-status { font-size:1.4rem; margin-bottom:0.3rem; }
+.audit-label { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--green); }
+.sparkline { display:flex; align-items:flex-end; gap:2px; height:28px; }
+.spark-bar { width:5px; border-radius:1px; background:var(--gold); opacity:0.6; transition:height 0.5s ease, opacity 0.2s; }
+.spark-bar:hover { opacity:1; }
+.dashboard-footer { border-top:1px solid var(--border); padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; background:var(--panel); font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--text-dim); position:relative; z-index:1; }
+.footer-note { color:var(--text-muted); }
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+@media(max-width:900px) {
+  .dashboard{grid-template-columns:1fr;} .sidebar{display:none;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);} .grid-2,.grid-3{grid-template-columns:1fr;}
+  .audit-grid{grid-template-columns:repeat(2,1fr);} .content{padding:1rem;} .topbar{padding:0.75rem 1rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="https://sakshi-kanaujia.github.io/Portfolio" class="logo">SK · MIS</a>
+    <div class="breadcrumb">Dashboard / <span>PMO & Billing Operations</span></div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="period-selector">
+      <button class="period-btn" onclick="setPeriod('Q1',this)">Q1</button>
+      <button class="period-btn" onclick="setPeriod('Q2',this)">Q2</button>
+      <button class="period-btn" onclick="setPeriod('Q3',this)">Q3</button>
+      <button class="period-btn active" onclick="setPeriod('Q4',this)">Q4</button>
+    </div>
+    <a href="https://sakshi-kanaujia.github.io/Portfolio" class="back-link">← Portfolio</a>
+  </div>
+</div>
+
+<div class="dashboard">
+  <div class="sidebar">
+    <div style="margin-bottom:2rem;">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active"><span>▣</span> Overview</div>
+      <div class="nav-item"><span>◈</span> Project Status</div>
+      <div class="nav-item"><span>◎</span> Billing Ops</div>
+      <div class="nav-item"><span>◇</span> Audit & Compliance</div>
+      <div class="nav-item"><span>○</span> Dispute Tracker</div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div style="margin-bottom:2rem;">
+      <div class="sidebar-label">Key Achievements</div>
+      <div class="kpi-mini"><div class="kpi-mini-label">Audit Score</div><div class="kpi-mini-val">100%</div><div class="kpi-mini-sub">4 consecutive years</div></div>
+      <div class="kpi-mini"><div class="kpi-mini-label">Cycle Reduction</div><div class="kpi-mini-val">~30%</div><div class="kpi-mini-sub">vs baseline</div></div>
+      <div class="kpi-mini"><div class="kpi-mini-label">Dispute Resolution</div><div class="kpi-mini-val">~40%</div><div class="kpi-mini-sub">faster than prev avg</div></div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div>
+      <div class="sidebar-label">Built by</div>
+      <div class="nav-item" style="color:var(--gold);">Sakshi Kanaujia</div>
+      <div class="nav-item" style="font-size:0.73rem;">PMO Analyst · LSS BB</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">PMO & Billing Operations Dashboard</div>
+        <div class="page-sub" id="pageSubtitle">FY 2024–25 · Q4 View · Sample / Portfolio Demo</div>
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card gold"><div class="kpi-label">Total Billing</div><div class="kpi-val" id="kpi-billing">₹4.2Cr</div><div class="kpi-change up" id="kpi-billing-ch">↑ 12.4% vs prev quarter</div></div>
+      <div class="kpi-card teal"><div class="kpi-label">Active Projects</div><div class="kpi-val" id="kpi-projects">2</div><div class="kpi-change neutral" id="kpi-projects-ch">→ 1 completed</div></div>
+      <div class="kpi-card rose"><div class="kpi-label">Open Disputes</div><div class="kpi-val" id="kpi-disputes">3</div><div class="kpi-change up" id="kpi-disputes-ch">↓ 72% vs Q1</div></div>
+      <div class="kpi-card green"><div class="kpi-label">Audit Compliance</div><div class="kpi-val" id="kpi-audit">100%</div><div class="kpi-change up" id="kpi-audit-ch">↑ 4th year running</div></div>
+    </div>
+
+    <!-- BILLING CHART + DONUT -->
+    <div class="grid-3">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Monthly Billing Trend</div>
+          <div class="panel-meta" id="chartMeta">Q4 · Oct–Dec · ₹ Lakhs</div>
+        </div>
+        <div class="chart-area" id="billingChart"></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Billed</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Collected</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Work Distribution</div>
+          <div class="panel-meta">By function</div>
+        </div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="45" fill="none" stroke="var(--border)" stroke-width="18"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="var(--gold)" stroke-width="18" stroke-dasharray="113 170" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="var(--teal)" stroke-width="18" stroke-dasharray="85 198" stroke-dashoffset="-113" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="var(--rose)" stroke-width="18" stroke-dasharray="57 226" stroke-dashoffset="-198" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="45" fill="none" stroke="var(--blue)" stroke-width="18" stroke-dasharray="28 255" stroke-dashoffset="-255" transform="rotate(-90 60 60)"/>
+            <text x="60" y="55" text-anchor="middle" fill="var(--white)" font-family="Syne" font-size="13" font-weight="700">2</text>
+            <text x="60" y="70" text-anchor="middle" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="7">Projects</text>
+          </svg>
+          <div style="width:100%;">
+            <div class="donut-item"><div class="donut-item-left"><div class="donut-item-dot" style="background:var(--gold)"></div>PMO Governance</div><div class="donut-item-val">40%</div></div>
+            <div class="donut-item"><div class="donut-item-left"><div class="donut-item-dot" style="background:var(--teal)"></div>Billing Ops</div><div class="donut-item-val">30%</div></div>
+            <div class="donut-item"><div class="donut-item-left"><div class="donut-item-dot" style="background:var(--rose)"></div>Compliance</div><div class="donut-item-val">20%</div></div>
+            <div class="donut-item"><div class="donut-item-left"><div class="donut-item-dot" style="background:var(--blue)"></div>Reporting</div><div class="donut-item-val">10%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECT TABLE -->
+    <div class="panel grid-full">
+      <div class="panel-header">
+        <div class="panel-title">Project Status Tracker</div>
+        <div class="panel-meta" id="projMeta">2 active projects · Q4</div>
+      </div>
+      <table class="proj-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Stakeholders</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Due</th>
+          </tr>
+        </thead>
+        <tbody id="projectTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- DISPUTES + AUDIT -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Dispute Resolution Tracker</div>
+          <div class="panel-meta">~40% faster post-intervention</div>
+        </div>
+        <div class="dispute-list">
+          <div class="dispute-item"><div><div class="dispute-type">Invoice Mismatch</div><div style="font-size:0.72rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;">Most common pre-intervention</div></div><div class="dispute-count" id="d1">2 open</div><div class="dispute-trend trend-down">↓ 68%</div></div>
+          <div class="dispute-item"><div><div class="dispute-type">Approval Handoff Delay</div><div style="font-size:0.72rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;">Fixed via SOP update</div></div><div class="dispute-count" id="d2">1 open</div><div class="dispute-trend trend-down">↓ 81%</div></div>
+          <div class="dispute-item"><div><div class="dispute-type">Data Entry Discrepancy</div><div style="font-size:0.72rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;">Template standardised</div></div><div class="dispute-count" id="d3">0 open</div><div class="dispute-trend trend-down">↓ 100%</div></div>
+          <div class="dispute-item"><div><div class="dispute-type">Partner Rate Conflict</div><div style="font-size:0.72rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;">Escalation process updated</div></div><div class="dispute-count" id="d4">0 open</div><div class="dispute-trend trend-down">↓ 75%</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Audit Compliance History</div>
+          <div class="panel-meta">100% pass rate · 4 years</div>
+        </div>
+        <div class="audit-grid">
+          <div class="audit-item"><div class="audit-year">FY 21–22</div><div class="audit-status">✅</div><div class="audit-label">PASSED</div></div>
+          <div class="audit-item"><div class="audit-year">FY 22–23</div><div class="audit-status">✅</div><div class="audit-label">PASSED</div></div>
+          <div class="audit-item"><div class="audit-year">FY 23–24</div><div class="audit-status">✅</div><div class="audit-label">PASSED</div></div>
+          <div class="audit-item"><div class="audit-year">FY 24–25</div><div class="audit-status">✅</div><div class="audit-label">PASSED</div></div>
+        </div>
+        <div style="margin-top:1.25rem;padding:1rem;background:var(--green-soft);border:1px solid rgba(85,239,196,0.2);">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--green);letter-spacing:0.1em;margin-bottom:0.3rem;">ACHIEVEMENT</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);">Zero audit findings across all 4 years — through proactive SOP governance, real-time MIS tracking, and cross-functional compliance coordination.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTING CYCLE -->
+    <div class="panel grid-full">
+      <div class="panel-header">
+        <div class="panel-title">Reporting Cycle Performance</div>
+        <div class="panel-meta">~30% reduction via template automation + process streamlining</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1rem;" id="reportingCycle"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="dashboard-footer">
+  <span>PMO & Billing MIS Dashboard · Sample / Portfolio Demo · Built by Sakshi Kanaujia</span>
+  <span class="footer-note">Data is illustrative — created to demonstrate MIS dashboard & PMO reporting skills</span>
+</div>
+
+<script>
+const DATA = {
+  Q1: {
+    subtitle: 'FY 2024–25 · Q1 View (Apr–Jun) · Sample / Portfolio Demo',
+    chartMeta: 'Q1 · Apr–Jun · ₹ Lakhs',
+    billing: '₹2.8Cr', billingCh: { cls:'down', txt:'↓ 6.2% vs prev quarter' },
+    projects: '2', projectsCh: { cls:'neutral', txt:'→ Both in progress' },
+    disputes: '11', disputesCh: { cls:'up', txt:'↑ High — pre-intervention' },
+    audit: '100%', auditCh: { cls:'up', txt:'↑ Year 1 of 4' },
+    projMeta: '2 active projects · Q1',
+    chartData: [{m:'Apr',b:62,c:54},{m:'May',b:71,c:63},{m:'Jun',b:68,c:60}],
+    projects: [
+      {name:'Billing Process Audit',stake:'SK / Finance',status:'status-on',label:'On Track',prog:60,col:'gold',due:'Jun 30'},
+      {name:'MIS Reporting Setup',stake:'SK / PMO',status:'status-on',label:'On Track',prog:45,col:'teal',due:'Jul 15'},
+    ],
+    disputes: ['7 open','3 open','1 open','0 open'],
+    cycle: [{m:'Apr',d:'8.2d',h:[60,80,70,90],c:'gold'},{m:'May',d:'7.8d',h:[75,65,80,70],c:'gold'},{m:'Jun',d:'7.5d',h:[70,75,68,72],c:'gold'},{m:'Target',d:'≤5.7d',h:[35,35,35,35],c:'rose',note:'not yet'}],
+  },
+  Q2: {
+    subtitle: 'FY 2024–25 · Q2 View (Jul–Sep) · Sample / Portfolio Demo',
+    chartMeta: 'Q2 · Jul–Sep · ₹ Lakhs',
+    billing: '₹3.1Cr', billingCh: { cls:'up', txt:'↑ 10.7% vs Q1' },
+    projects: '2', projectsCh: { cls:'neutral', txt:'→ 1 completed' },
+    disputes: '7', disputesCh: { cls:'up', txt:'↓ 36% vs Q1' },
+    audit: '100%', auditCh: { cls:'up', txt:'↑ Year 2 of 4' },
+    projMeta: '2 active projects · Q2',
+    chartData: [{m:'Jul',b:82,c:74},{m:'Aug',c:85,b:91},{m:'Sep',b:78,c:72}],
+    projects: [
+      {name:'SOP Documentation',stake:'SK / Ops',status:'status-on',label:'On Track',prog:70,col:'teal',due:'Sep 20'},
+      {name:'Dispute Root Cause Analysis',stake:'SK / Finance',status:'status-on',label:'On Track',prog:55,col:'gold',due:'Oct 10'},
+    ],
+    disputes: ['4 open','2 open','1 open','0 open'],
+    cycle: [{m:'Jul',d:'7.2d',h:[65,60,70,68],c:'gold'},{m:'Aug',d:'6.8d',h:[60,55,65,58],c:'gold'},{m:'Sep',d:'6.4d',h:[55,50,60,52],c:'teal'},{m:'Target',d:'≤5.7d',h:[35,35,35,35],c:'rose',note:'in progress'}],
+  },
+  Q3: {
+    subtitle: 'FY 2024–25 · Q3 View (Oct–Dec) · Sample / Portfolio Demo',
+    chartMeta: 'Q3 · Oct–Dec · ₹ Lakhs',
+    billing: '₹3.7Cr', billingCh: { cls:'up', txt:'↑ 19.4% vs Q2' },
+    projects: '2', projectsCh: { cls:'neutral', txt:'→ 1 on hold' },
+    disputes: '5', disputesCh: { cls:'up', txt:'↓ 55% vs Q1' },
+    audit: '100%', auditCh: { cls:'up', txt:'↑ Year 3 of 4' },
+    projMeta: '2 active projects · Q3',
+    chartData: [{m:'Oct',b:105,c:98},{m:'Nov',b:118,c:110},{m:'Dec',b:132,c:125}],
+    projects: [
+      {name:'Billing Reconciliation',stake:'SK / Finance',status:'status-on',label:'On Track',prog:80,col:'gold',due:'Dec 31'},
+      {name:'Process Improvement Review',stake:'SK / QA',status:'status-hold',label:'On Hold',prog:30,col:'rose',due:'TBD'},
+    ],
+    disputes: ['3 open','1 open','1 open','0 open'],
+    cycle: [{m:'Oct',d:'6.1d',h:[52,48,56,50],c:'teal'},{m:'Nov',d:'5.9d',h:[48,45,50,46],c:'teal'},{m:'Dec',d:'5.7d',h:[40,42,38,44],c:'green'},{m:'Target',d:'≤5.7d',h:[35,35,35,35],c:'green',note:'achieved ✓'}],
+  },
+  Q4: {
+    subtitle: 'FY 2024–25 · Q4 View (Jan–Mar) · Sample / Portfolio Demo',
+    chartMeta: 'Q4 · Jan–Mar · ₹ Lakhs',
+    billing: '₹4.2Cr', billingCh: { cls:'up', txt:'↑ 12.4% vs Q3' },
+    projects: '2', projectsCh: { cls:'neutral', txt:'→ 1 completed' },
+    disputes: '3', disputesCh: { cls:'up', txt:'↓ 72% vs Q1' },
+    audit: '100%', auditCh: { cls:'up', txt:'↑ 4th year running' },
+    projMeta: '2 active projects · Q4',
+    chartData: [{m:'Jan',b:98,c:92},{m:'Feb',b:112,c:108},{m:'Mar',b:125,c:119}],
+    projects: [
+      {name:'Billing Reconciliation Q4',stake:'SK / Finance',status:'status-on',label:'On Track',prog:85,col:'gold',due:'Jun 30'},
+      {name:'Audit Compliance Review',stake:'SK / QA',status:'status-done',label:'Completed',prog:100,col:'blue',due:'Done'},
+    ],
+    disputes: ['2 open','1 open','0 open','0 open'],
+    cycle: [{m:'Apr',d:'5.5d',h:[42,38,45,40],c:'green'},{m:'May',d:'5.3d',h:[38,35,40,36],c:'green'},{m:'Jun',d:'5.1d',h:[34,32,36,33],c:'green'},{m:'Target',d:'≤5.7d',h:[35,35,35,35],c:'green',note:'achieved ✓'}],
+  }
+};
+
+function renderChart(chartData) {
+  const chart = document.getElementById('billingChart');
+  const maxVal = Math.max(...chartData.map(d => d.b));
+  chart.innerHTML = '';
+  chartData.forEach(d => {
+    const wrap = document.createElement('div');
+    wrap.className = 'chart-bar-wrap';
+    const billedH = Math.round((d.b/maxVal)*140);
+    const collH = Math.round((d.c/maxVal)*140);
+    wrap.innerHTML = `
+      <div style="display:flex;gap:2px;align-items:flex-end;flex:1;justify-content:center;">
+        <div class="chart-bar gold-bar" style="height:${billedH}px;flex:1;" title="Billed: ₹${d.b}L"></div>
+        <div class="chart-bar teal-bar" style="height:${collH}px;flex:1;" title="Collected: ₹${d.c}L"></div>
+      </div>
+      <div class="chart-label">${d.m}</div>`;
+    chart.appendChild(wrap);
+  });
+}
+
+function renderProjects(projects, meta) {
+  document.getElementById('projMeta').textContent = meta;
+  const tbody = document.getElementById('projectTableBody');
+  tbody.className = 'fade-in';
+  tbody.innerHTML = projects.map(p => `
+    <tr>
+      <td class="proj-name">${p.name}</td>
+      <td>${p.stake}</td>
+      <td><span class="status-badge ${p.status}">${p.label}</span></td>
+      <td><div class="progress-bar-wrap"><div class="progress-track"><div class="progress-fill ${p.col}" style="width:${p.prog}%"></div></div><div class="progress-pct">${p.prog}%</div></div></td>
+      <td>${p.due}</td>
+    </tr>`).join('');
+}
+
+function renderCycle(cycle) {
+  const el = document.getElementById('reportingCycle');
+  el.innerHTML = cycle.map(c => {
+    const colorVar = c.c === 'gold' ? 'var(--gold)' : c.c === 'teal' ? 'var(--teal)' : c.c === 'rose' ? 'var(--rose)' : 'var(--green)';
+    const bgStyle = c.note && c.note.includes('✓') ? 'background:var(--green-soft);border:1px solid rgba(85,239,196,0.2);' : 'background:var(--panel2);border:1px solid var(--border);';
+    const bars = c.h.map(h => `<div class="spark-bar" style="height:${h}%;background:${colorVar}"></div>`).join('');
+    return `<div style="text-align:center;padding:1rem;${bgStyle}">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:${c.note && c.note.includes('✓') ? 'var(--green)' : 'var(--text-dim)'};margin-bottom:0.5rem;letter-spacing:0.1em;">${c.m}</div>
+      <div class="sparkline" style="justify-content:center;margin-bottom:0.4rem;">${bars}</div>
+      <div style="font-size:0.78rem;color:${colorVar};font-weight:600;">${c.d}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:${c.note && c.note.includes('✓') ? 'var(--green)' : 'var(--text-dim)'};">${c.note || 'cycle'}</div>
+    </div>`;
+  }).join('');
+}
+
+function setPeriod(period, btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = DATA[period];
+  // Update subtitle
+  document.getElementById('pageSubtitle').textContent = d.subtitle;
+  document.getElementById('chartMeta').textContent = d.chartMeta;
+  // Update KPIs
+  document.getElementById('kpi-billing').textContent = d.billing;
+  const bch = document.getElementById('kpi-billing-ch');
+  bch.className = `kpi-change ${d.billingCh.cls}`; bch.textContent = d.billingCh.txt;
+  document.getElementById('kpi-projects').textContent = '2';
+  const pch = document.getElementById('kpi-projects-ch');
+  pch.className = `kpi-change ${d.projectsCh.cls}`; pch.textContent = d.projectsCh.txt;
+  document.getElementById('kpi-disputes').textContent = d.disputes;
+  const dch = document.getElementById('kpi-disputes-ch');
+  dch.className = `kpi-change ${d.disputesCh.cls}`; dch.textContent = d.disputesCh.txt;
+  document.getElementById('kpi-audit').textContent = d.audit;
+  const ach = document.getElementById('kpi-audit-ch');
+  ach.className = `kpi-change ${d.auditCh.cls}`; ach.textContent = d.auditCh.txt;
+  // Chart
+  renderChart(d.chartData);
+  // Projects
+  renderProjects(d.projects, d.projMeta);
+  // Disputes
+  const ids = ['d1','d2','d3','d4'];
+  ids.forEach((id,i) => { document.getElementById(id).textContent = d.disputes[i]; });
+  // Reporting cycle
+  renderCycle(d.cycle);
+}
+
+// Initial render
+setPeriod('Q4', document.querySelector('.period-btn.active'));
+</script>
+</body>
+</html>
